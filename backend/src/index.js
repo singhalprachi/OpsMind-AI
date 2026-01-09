@@ -73,69 +73,147 @@
 //   res.status(500).json({ message: "Internal Server Error", error: err.message });
 // });
 
+// import dotenv from "dotenv"; // always first
+// dotenv.config();
+
+// import express from "express";
+// import mongoose from "mongoose";
+// import cors from "cors";
+
+// import uploadRoutes from "./routes/upload.route.js";
+// import chatRoutes from "./routes/chat.route.js";
+// import { requireApiKey } from "./middleware/auth.middleware.js";
+
+// const app = express();
+
+// // --- CORS middleware ---
+// app.use(cors({
+//   origin: "https://coruscating-scone-e24166.netlify.app", // Netlify frontend URL
+//   methods: ["GET", "POST"],
+//   credentials: true,
+// }));
+
+// // --- Body parsers ---
+// app.use(express.json());
+// app.use(express.urlencoded({ extended: true }));
+
+// // --- Public test route ---
+// app.get("/api/test", (req, res) => {
+//   res.json({ message: "🚀 Backend is alive!" });
+// });
+
+// // --- Protected routes ---
+// app.use("/api/upload", requireApiKey, uploadRoutes);
+// app.use("/api/chat", requireApiKey, chatRoutes);
+
+// // --- Root route ---
+// app.get("/", (req, res) => {
+//   res.send("🚀 OpsMind AI backend is running!");
+// });
+
+// // --- PORT & MongoDB URI ---
+// const PORT = process.env.PORT || 5000;
+// const MONGO_URI = process.env.MONGO_URI;
+
+// if (!MONGO_URI) {
+//   console.error("❌ MongoDB URI is not defined in .env");
+//   process.exit(1);
+// }
+
+// // --- Connect to MongoDB and start server ---
+// mongoose
+//   .connect(MONGO_URI)
+//   .then(() => {
+//     console.log("✅ MongoDB Connected");
+//     app.listen(PORT, () => {
+//       console.log(`🚀 OpsMind AI backend running on port ${PORT}`);
+//     });
+//   })
+//   .catch(err => {
+//     console.error("❌ MongoDB Connection Error:", err);
+//     process.exit(1);
+//   });
+
+// // --- Global error handler ---
+// app.use((err, req, res, next) => {
+//   console.error("❌ Global Error:", err);
+//   res.status(500).json({ message: "Internal Server Error", error: err.message });
+// });
+
+// index.js
 import dotenv from "dotenv"; // always first
 dotenv.config();
 
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
+import fs from "fs";
 
 import uploadRoutes from "./routes/upload.route.js";
 import chatRoutes from "./routes/chat.route.js";
-import { requireApiKey } from "./middleware/auth.middleware.js";
+// import { requireApiKey } from "./middleware/auth.middleware.js"; // ❌ disable for now
 
 const app = express();
 
-// --- CORS middleware ---
+/* -------------------- CORS -------------------- */
+/* SAFE for Render + Netlify */
 app.use(cors({
-  origin: "https://coruscating-scone-e24166.netlify.app/", // Netlify frontend URL
-  methods: ["GET", "POST"],
+  origin: "https://coruscating-scone-e24166.netlify.app", // NO trailing slash
   credentials: true,
 }));
 
-// --- Body parsers ---
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+/* -------------------- BODY PARSERS -------------------- */
+app.use(express.json({ limit: "20mb" }));
+app.use(express.urlencoded({ extended: true, limit: "20mb" }));
 
-// --- Public test route ---
+/* -------------------- ENSURE UPLOADS FOLDER -------------------- */
+if (!fs.existsSync("uploads")) {
+  fs.mkdirSync("uploads");
+  console.log("📁 uploads folder created");
+}
+
+/* -------------------- TEST ROUTE -------------------- */
 app.get("/api/test", (req, res) => {
   res.json({ message: "🚀 Backend is alive!" });
 });
 
-// --- Protected routes ---
-app.use("/api/upload", requireApiKey, uploadRoutes);
-app.use("/api/chat", requireApiKey, chatRoutes);
+/* -------------------- ROUTES -------------------- */
+// 🔓 API key disabled for testing (IMPORTANT)
+app.use("/api/upload", uploadRoutes);
+app.use("/api/chat", chatRoutes);
 
-// --- Root route ---
+/* -------------------- ROOT -------------------- */
 app.get("/", (req, res) => {
   res.send("🚀 OpsMind AI backend is running!");
 });
 
-// --- PORT & MongoDB URI ---
+/* -------------------- DB + SERVER -------------------- */
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI;
 
 if (!MONGO_URI) {
-  console.error("❌ MongoDB URI is not defined in .env");
+  console.error("❌ MongoDB URI missing");
   process.exit(1);
 }
 
-// --- Connect to MongoDB and start server ---
 mongoose
   .connect(MONGO_URI)
   .then(() => {
     console.log("✅ MongoDB Connected");
     app.listen(PORT, () => {
-      console.log(`🚀 OpsMind AI backend running on port ${PORT}`);
+      console.log(`🚀 Server running on port ${PORT}`);
     });
   })
-  .catch(err => {
-    console.error("❌ MongoDB Connection Error:", err);
+  .catch((err) => {
+    console.error("❌ MongoDB connection failed:", err);
     process.exit(1);
   });
 
-// --- Global error handler ---
+/* -------------------- GLOBAL ERROR HANDLER -------------------- */
 app.use((err, req, res, next) => {
   console.error("❌ Global Error:", err);
-  res.status(500).json({ message: "Internal Server Error", error: err.message });
+  res.status(500).json({
+    message: "Internal Server Error",
+    error: err.message,
+  });
 });
