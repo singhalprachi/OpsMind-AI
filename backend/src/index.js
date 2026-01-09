@@ -90,7 +90,7 @@ const app = express();
 
 // --- CORS middleware ---
 app.use(cors({
-  origin: "https://coruscating-scone-e24166.netlify.app",
+  origin: "https://coruscating-scone-e24166.netlify.app/",
   methods: ["GET", "POST"],
   credentials: true,
 }));
