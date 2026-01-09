@@ -72,7 +72,7 @@
 //   console.error("❌ Global Error:", err);
 //   res.status(500).json({ message: "Internal Server Error", error: err.message });
 // });
-import dotenv from "dotenv";
+// import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -102,6 +102,11 @@ app.use("/api/upload", requireApiKey, uploadRoutes);
 
 // Chat routes
 app.use("/api/chat", requireApiKey, chatRoutes);
+
+// --- Root route ---
+app.get("/", (req, res) => {
+  res.send("🚀 OpsMind AI backend is running!");
+});
 
 // --- PORT & MongoDB URI ---
 const PORT = process.env.PORT || 5000;
