@@ -72,7 +72,9 @@
 //   console.error("❌ Global Error:", err);
 //   res.status(500).json({ message: "Internal Server Error", error: err.message });
 // });
-// import dotenv from "dotenv";
+
+import dotenv from "dotenv"; // <-- always first
+dotenv.config();   
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -82,7 +84,7 @@ import uploadRoutes from "./routes/upload.route.js";
 import chatRoutes from "./routes/chat.route.js";
 import { requireApiKey } from "./middleware/auth.middleware.js";
 
-dotenv.config();
+
 
 const app = express();
 
