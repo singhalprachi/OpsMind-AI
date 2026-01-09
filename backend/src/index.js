@@ -73,36 +73,37 @@
 //   res.status(500).json({ message: "Internal Server Error", error: err.message });
 // });
 
-import dotenv from "dotenv"; // <-- always first
-dotenv.config();   
+import dotenv from "dotenv"; // always first
+dotenv.config();
+
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
-import path from "path";
 
 import uploadRoutes from "./routes/upload.route.js";
 import chatRoutes from "./routes/chat.route.js";
 import { requireApiKey } from "./middleware/auth.middleware.js";
 
-
-
 const app = express();
 
 // --- CORS middleware ---
 app.use(cors({
-  origin: "https://coruscating-scone-e24166.netlify.app/",
+  origin: "https://coruscating-scone-e24166.netlify.app", // Netlify frontend URL
   methods: ["GET", "POST"],
   credentials: true,
 }));
 
+// --- Body parsers ---
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// --- ROUTES ---
-// POST /api/upload
-app.use("/api/upload", requireApiKey, uploadRoutes);
+// --- Public test route ---
+app.get("/api/test", (req, res) => {
+  res.json({ message: "🚀 Backend is alive!" });
+});
 
-// Chat routes
+// --- Protected routes ---
+app.use("/api/upload", requireApiKey, uploadRoutes);
 app.use("/api/chat", requireApiKey, chatRoutes);
 
 // --- Root route ---
@@ -122,10 +123,8 @@ if (!MONGO_URI) {
 // --- Connect to MongoDB and start server ---
 mongoose
   .connect(MONGO_URI)
-  .then(async () => {
+  .then(() => {
     console.log("✅ MongoDB Connected");
-
-    // Start Express server
     app.listen(PORT, () => {
       console.log(`🚀 OpsMind AI backend running on port ${PORT}`);
     });
