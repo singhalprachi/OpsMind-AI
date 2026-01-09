@@ -23,7 +23,9 @@ export default function ChatBox() {
   });
   const [isStreaming, setIsStreaming] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [currentCitations, setCurrentCitations] = useState([]);
+  // const [currentCitations, setCurrentCitations] = useState([]);
+  const [, setCurrentCitations] = useState([]);
+
   const evtRef = useRef(null);
   const chatEndRef = useRef(null);
   const fileInputRef = useRef(null);
